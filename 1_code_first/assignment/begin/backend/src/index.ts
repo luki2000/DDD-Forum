@@ -70,14 +70,15 @@ app.post('/users/new', async (req: Request, res: Response): Promise<void> => {
         }
 
         // save to database
-        const newUser = await prisma.user.create({
-            data: {
-                ...userData,
-                password: generateRandomPassword(10),               
-            },
+        const { user, member } = await prisma.$transaction(async (tx) => {
+        const user = await tx.user.create({ data: { ...userData, password: generateRandomPassword(10) } });
+        const member = await tx.member.create({ data: { userId: user.id }});
+            return { user, member }
         });
+
+
         // send response without password
-        const userInfoWithoutPassword = parseUserForResponse(newUser);
+        const userInfoWithoutPassword = parseUserForResponse(user);
         res.status(201).json({message: 'User created', data: userInfoWithoutPassword});
 
     } catch(error) {
@@ -198,7 +199,42 @@ app.get('/users', async (req: Request, res: Response): Promise<void> => {
     } catch(error) {
         const err = error as Error;
         res.status(500).json({
-            error: Errors.ValidationError,
+            error: Errors.ServerError,
+            data: error,
+            success: false,
+        });
+    }
+});
+
+app.get('/posts', async (req: Request, res: Response) => {
+    const sort = req.query.sort;
+
+    try {
+        if (sort !== 'recent') {
+            return res.status(400).json({ error: Errors.ClientError, data: undefined, success: false })
+        } 
+
+        let postsWithVotes = await prisma.post.findMany({
+            include: {
+            votes: true, // Include associated votes for each post
+            memberPostedBy: {
+                include: {
+                user: true
+                }
+            },
+            comments: true
+            },
+            orderBy: {
+            dateCreated: 'desc', // Sorts by dateCreated in descending order
+            },
+        });
+  
+    
+       // get posts
+       return res.json({ error: undefined, data: { posts: postsWithVotes }, success: true });
+    } catch(error) {
+        res.status(500).json({
+            error: Errors.ServerError,
             data: error,
             success: false,
         });

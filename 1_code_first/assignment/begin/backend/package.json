@@ -6,6 +6,10 @@
   "scripts": {
     "build": "rimraf ./build && tsc",
     "start:dev": "npx nodemon",
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "reset":"npx prisma migrate reset",
+    "db:seed": "prisma db seed",
     "start": "npm run build && node build/index.js",
     "lint": "eslint . --ext .ts",
     "prettier-format": "run-script-os",
@@ -23,6 +27,9 @@
     "hooks": {
       "pre-commit": "npm run test && npm run prettier-format && npm run lint"
     }
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
