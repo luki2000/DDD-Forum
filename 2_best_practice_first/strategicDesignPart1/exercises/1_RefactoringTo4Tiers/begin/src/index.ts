@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { prisma } from './database';
+import { isMissingKeys, parseForResponse, isUUID } from './helpers/helpers';
 import { Student, Class, Assignment, StudentAssignment } from '@prisma/client';
 import { error } from 'console';
 const cors = require('cors');
@@ -17,22 +18,6 @@ const Errors = {
     ClientError: 'ClientError',
     StudentAlreadyEnrolled: 'StudentAlreadyEnrolled'
   }
-
-
-function isMissingKeys (data: any, keysToCheckFor: string[]) {
-    for (let key of keysToCheckFor) {
-      if (data[key] === undefined) return true;
-    } 
-    return false;
-}
-
-function parseForResponse(data: unknown) {
-    return JSON.parse(JSON.stringify(data));
-}
-
-function isUUID (id: string) {
-    return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id);
-}
 
 // API Endpoints
 
