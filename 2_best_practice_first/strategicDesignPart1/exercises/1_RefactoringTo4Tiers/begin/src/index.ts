@@ -22,15 +22,19 @@ const Errors = {
 // API Endpoints
 
 // POST student created
-app.post('/students', async (req: Request, res: Response) => {
-	try {
+// controller layer
+app.post('/students', createStudentController);
+
+async function createStudentController(req: Request, res: Response) {
+    try {
 		if (isMissingKeys(req.body, ['name'])) {
 			return res.status(400).json({ error: Errors.ValidationError, data: undefined, success: false });
 		}
 
 		const { name } = req.body;
 
-		const student = await prisma.student.create({
+		// persistance layer
+        const student = await prisma.student.create({
 			data: {
 				name
 			}
@@ -40,7 +44,7 @@ app.post('/students', async (req: Request, res: Response) => {
 	} catch (error) {
 		res.status(500).json({ error: Errors.ServerError, data: undefined, success: false });
 	}
-});
+}
 
 // POST class created
 app.post('/classes', async (req: Request, res: Response) => {
