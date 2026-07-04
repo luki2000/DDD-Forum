@@ -1,4 +1,4 @@
-import { isMissingKeys } from "../../../helpers/helpers";
+import { isMissingKeys } from "../../../shared/utilities/helpers";
 
 class CreateStudentDto {
     constructor(public name: string) {}

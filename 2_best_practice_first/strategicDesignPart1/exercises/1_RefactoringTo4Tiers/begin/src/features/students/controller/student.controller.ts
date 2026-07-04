@@ -1,33 +1,25 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { prisma } from '../../../database';
-import { isMissingKeys, parseForResponse } from '../../../helpers/helpers';
+import { isMissingKeys, parseForResponse } from '../../../shared/utilities/helpers';
+import StudentService from '../service/student.service';
+import { ErrorExceptionHandler } from '../../../shared/errors-and-exceptions/error-exception-handler';
 
-const Errors = {
-    ValidationError: 'ValidationError',
-    ServerError: 'ServerError',
-};
 
 class StudentController {
-    constructor() {}
+    constructor(
+        private readonly studentService: StudentService,
+        private readonly errorExceptionHandler: ErrorExceptionHandler) {}
 
-    private async createStudent(req: Request, res: Response) {
+    private async createStudent(req: Request, res: Response, next: NextFunction) {
         try {
-            if (isMissingKeys(req.body, ['name'])) {
-                return res.status(400).json({ error: Errors.ValidationError, data: undefined, success: false });
-            }
     
             const { name } = req.body;
     
-            // persistance layer
-            const student = await prisma.student.create({
-                data: {
-                    name
-                }
-            });
+            const student = this.studentService.createStudent(name);
     
             res.status(201).json({ error: undefined, data: parseForResponse(student), success: true });
         } catch (error) {
-            res.status(500).json({ error: Errors.ServerError, data: undefined, success: false });
+            next(error);
         }
     }
 }
