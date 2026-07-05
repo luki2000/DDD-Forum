@@ -24,7 +24,7 @@ class StudentController {
     }
     // baseUrl will be /students
     private routes() {
-        this.router.post("/", this.createStudent.bind(this));
+        this.router.post("/", (req, res, next) => this.createStudent(req, res, next));
         /*this.router.get("/:id", this.assignStudent);
         this.router.post("/submit", this.submitAssignment);
         this.router.post("/grade", this.gradeAssignment);*/

@@ -6,31 +6,25 @@ interface StudentPersistence {
     // getById(id: string): any;
     // getAssignments(id: string): any;
     // getGrades(id: string): any;
-  }
+}
 
-class Database {
-    public students: StudentPersistence;
-    
-    constructor(private readonly db: PrismaClient) {
-        this.students = this.buildStudentPersistence();
-    }
+class StudentRepository implements StudentPersistence {
+    constructor(private readonly db: PrismaClient) {}
 
-    private buildStudentPersistence(): StudentPersistence {
-        return {
-          save: this.saveStudent.bind(this),
-         // getAll: this.getAllStudents,
-         // getById: this.getStudentById,
-         // getAssignments: this.getStudentAssignments,
-         // getGrades: this.getStudentGrades,
-        };
-      }
-
-    private async saveStudent(studentName: string) {
+    async save(name: string) {
         return await this.db.student.create({
             data: {
-                name: studentName
+                name
             }
         });
+    }
+}
+
+class Database {
+    public readonly students: StudentPersistence;
+
+    constructor(db: PrismaClient) {
+        this.students = new StudentRepository(db);
     }
 }
 
