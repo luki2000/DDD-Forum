@@ -3,6 +3,10 @@ import { prisma } from './database';
 import { isMissingKeys, parseForResponse, isUUID } from './shared/utilities/helpers';
 import { Student, Class, Assignment, StudentAssignment } from '@prisma/client';
 import { error } from 'console';
+import StudentController from './features/students/controller/student.controller';
+import StudentService from './features/students/service/student.service';
+import Database from './features/students/persistance/student.database';
+import { ErrorExceptionHandler } from './shared/errors-and-exceptions/error-exception-handler';
 const cors = require('cors');
 const app = express();
 app.use(express.json());
@@ -22,8 +26,11 @@ export const ErrorExceptionType = {
 // API Endpoints
 
 // POST student created
-// controller layer
-
+const studentDatabase = new Database(prisma);
+const studentService = new StudentService(studentDatabase);
+const errorExceptionHandler = new ErrorExceptionHandler();
+const studentController = new StudentController(studentService, errorExceptionHandler);
+app.use('/students', studentController.getRouter());
 
 // POST student assigned to class
 app.post('/class-enrollments', async (req: Request, res: Response) => {

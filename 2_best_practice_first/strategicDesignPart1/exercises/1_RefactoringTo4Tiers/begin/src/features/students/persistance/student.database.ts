@@ -17,7 +17,7 @@ class Database {
 
     private buildStudentPersistence(): StudentPersistence {
         return {
-          save: this.saveStudent,
+          save: this.saveStudent.bind(this),
          // getAll: this.getAllStudents,
          // getById: this.getStudentById,
          // getAssignments: this.getStudentAssignments,
