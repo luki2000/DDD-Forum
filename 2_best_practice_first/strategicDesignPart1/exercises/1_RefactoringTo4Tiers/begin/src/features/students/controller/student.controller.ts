@@ -2,6 +2,7 @@ import { Router, NextFunction, Request, Response } from 'express';
 import { parseForResponse } from '../../../shared/utilities/helpers';
 import StudentService from '../service/student.service';
 import { ErrorExceptionHandler } from '../../../shared/errors-and-exceptions/error-exception-handler';
+import CreateStudentDto from '../view/create-student.dto';
 
 
 class StudentController {
@@ -31,8 +32,8 @@ class StudentController {
 
     private async createStudent(req: Request, res: Response, next: NextFunction) {
         try {
-            const { name } = req.body;
-            const student = this.studentService.createStudent(name);
+            const dto = CreateStudentDto.fromRequest(req.body);
+            const student = await this.studentService.createStudent(dto);
             res.status(201).json({ error: undefined, data: parseForResponse(student), success: true });
         } catch (error) {
             next(error);
