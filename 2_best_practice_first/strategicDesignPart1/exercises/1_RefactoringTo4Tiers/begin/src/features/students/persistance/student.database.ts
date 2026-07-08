@@ -2,8 +2,8 @@ import { PrismaClient } from "@prisma/client";
 
 interface StudentPersistence {
     save(name: string): any;
-    // getAll(): any;
-    // getById(id: string): any;
+    getAll(): any;
+    getById(id: string): any;
     // getAssignments(id: string): any;
     // getGrades(id: string): any;
 }
@@ -18,12 +18,38 @@ class StudentRepository implements StudentPersistence {
             }
         });
     }
+
+    async getAll() {
+        return await this.db.student.findMany({
+            include: {
+                classes: true,
+                assignments: true,
+                reportCards: true
+            }, 
+            orderBy: {
+                name: 'asc'
+            }
+        });
+    }
+
+    async getById(id: string) {
+        return await this.db.student.findUnique({
+            where: {
+                id
+            },
+            include: {
+                classes: true,
+                assignments: true,
+                reportCards: true
+            }
+        });
+    }
 }
 
 class Database {
     public readonly students: StudentPersistence;
 
-    constructor(db: PrismaClient) {
+    constructor(private readonly db: PrismaClient) {
         this.students = new StudentRepository(db);
     }
 }
