@@ -1,5 +1,5 @@
 import { Router, NextFunction, Request, Response } from 'express';
-import { isUUID, parseForResponse } from '../../../shared/utilities/helpers';
+import { parseForResponse } from '../../../shared/utilities/helpers';
 import StudentService from '../service/student.service';
 import { ErrorExceptionHandler } from '../../../shared/errors-and-exceptions/error-exception-handler';
 import CreateStudentDto from '../view/create-student.dto';
@@ -72,18 +72,10 @@ class StudentController {
             const student = await this.studentService.getStudent(dto);
     
             if (!student) {
-                return new StudentNotFoundException;
+                throw new StudentNotFoundException;
             }
     
-            const studentAssignments = await prisma.studentAssignment.findMany({
-                where: {
-                    studentId: id,
-                    status: 'submitted'
-                },
-                include: {
-                    assignment: true
-                },
-            });
+            const studentAssignments = await this.studentService.getStudentAssignment(dto);
         
             res.status(200).json({ error: undefined, data: parseForResponse(studentAssignments), success: true });
         } catch (error) {
@@ -93,34 +85,14 @@ class StudentController {
 
     private async getAllStudentGrades(req: Request, res: Response, next: NextFunction) {
         try {
-            const { id } = req.params;
-            if(!isUUID(id)) {
-                return res.status(400).json({ error: ErrorExceptionType.ValidationError, data: undefined, success: false });
-            }
-    
-            // check if student exists
-            const student = await prisma.student.findUnique({
-                where: {
-                    id
-                }
-            });
+            const dto = StudentIdDto.fromRequest(req.params);
+            const student = await this.studentService.getStudent(dto);
     
             if (!student) {
-                return res.status(404).json({ error: ErrorExceptionType.StudentNotFound, data: undefined, success: false });
+                throw new StudentNotFoundException;
             }
     
-            const studentAssignments = await prisma.studentAssignment.findMany({
-                where: {
-                    studentId: id,
-                    status: 'submitted',
-                    grade: {
-                        not: null
-                    }
-                },
-                include: {
-                    assignment: true
-                },
-            });
+            const studentAssignments = await this.studentService.getStudentGrades(dto);
         
             res.status(200).json({ error: undefined, data: parseForResponse(studentAssignments), success: true });
         } catch (error) {

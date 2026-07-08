@@ -18,7 +18,11 @@ class StudentService {
     }
 
     async getStudentAssignment(student: StudentIdDto){
-        return await this.db.students.getById(student.id);
+        return await this.db.students.getAssignments(student.id);
+    }
+
+    async getStudentGrades(student: StudentIdDto){
+        return await this.db.students.getGrades(student.id);
     }
 }
 

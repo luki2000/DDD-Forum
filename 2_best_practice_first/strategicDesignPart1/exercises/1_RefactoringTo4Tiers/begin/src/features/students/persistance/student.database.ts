@@ -4,8 +4,8 @@ interface StudentPersistence {
     save(name: string): any;
     getAll(): any;
     getById(id: string): any;
-    // getAssignments(id: string): any;
-    // getGrades(id: string): any;
+    getAssignments(id: string): any;
+    getGrades(id: string): any;
 }
 
 class StudentRepository implements StudentPersistence {
@@ -42,6 +42,33 @@ class StudentRepository implements StudentPersistence {
                 assignments: true,
                 reportCards: true
             }
+        });
+    }
+
+    async getAssignments(id: string) {
+        return await this.db.studentAssignment.findMany({
+            where: {
+                studentId: id,
+                status: 'submitted'
+            },
+            include: {
+                assignment: true
+            },
+        });
+    }
+
+    async getGrades(id: string) {
+        return await this.db.studentAssignment.findMany({
+            where: {
+                studentId: id,
+                status: 'submitted',
+                grade: {
+                    not: null
+                }
+            },
+            include: {
+                assignment: true
+            },
         });
     }
 }
