@@ -3,6 +3,7 @@ import { parseForResponse } from '../../../shared/utilities/helpers';
 import { ErrorExceptionHandler } from '../../../shared/errors-and-exceptions/error-exception-handler';
 import { ClassNotFoundException, StudentAlreadyEnrolledException, StudentNotFoundException } from '../../../shared/errors-and-exceptions/exceptions';
 import StudentService from '../../students/service/student.service';
+import StudentIdDto from '../../students/view/student-id.dto';
 import ClassEnrollementsService from '../service/class-enrollements.service';
 import EnrollStudentDto from '../view/enroll-student.dto';
 import ClassesService from '../../classes/service/classes.service';
@@ -27,15 +28,17 @@ class ClassEnrollementsController {
     private setupErrorHandler() {
         this.router.use(this.errorExceptionHandler.handle);
     }
-    // baseUrl will be /classes-enrollements
+    // baseUrl will be /class-enrollements
     private routes() {
-       this.router.get('/', (req, res, next) => this.enrollStudent(req, res, next));
+       this.router.post('/', (req, res, next) => this.enrollStudent(req, res, next));
     }    
 
     private async enrollStudent(req: Request, res: Response, next: NextFunction) {
         try {
-            const dto = EnrollStudentDto.fromRequest(req.params);
-            const student = await this.studentService.getStudent(dto);
+            const dto = EnrollStudentDto.fromRequest(req.body);
+            const student = await this.studentService.getStudent(
+                StudentIdDto.fromRequest({ id: dto.studentId })
+            );
     
             if (!student) {
                 throw new StudentNotFoundException;

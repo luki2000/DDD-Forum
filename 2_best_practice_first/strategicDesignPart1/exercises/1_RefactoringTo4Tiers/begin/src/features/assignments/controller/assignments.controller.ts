@@ -24,17 +24,17 @@ class AssignmentsController {
     private setupErrorHandler() {
         this.router.use(this.errorExceptionHandler.handle);
     }
-    // baseUrl will be /assignements
+    // baseUrl will be /assignments
     private routes() {
        this.router.post("/", (req, res, next) => this.createAssignment(req, res, next));
-       this.router.post("/:id", (req, res, next) => this.getAssignment(req, res, next));
+       this.router.get("/:id", (req, res, next) => this.getAssignment(req, res, next));
     }
     
     private async createAssignment(req: Request, res: Response, next: NextFunction) {
         try {
             const dto = CreateAssignmentDto.fromRequest(req.body);
         
-            const assignment = this.assignmentsService.createAssignment(dto);
+            const assignment = await this.assignmentsService.createAssignment(dto);
         
             res.status(201).json({ error: undefined, data: parseForResponse(assignment), success: true });
         } catch (error) {
@@ -46,7 +46,7 @@ class AssignmentsController {
     private async getAssignment(req: Request, res: Response, next: NextFunction) {
         try {
             const dto = AssignmentIdDto.fromRequest(req.params)
-            const assignment = this.assignmentsService.getAssignment(dto)
+            const assignment = await this.assignmentsService.getAssignment(dto)
         
             if (!assignment) {
                 throw new AssignmentNotFoundException;
