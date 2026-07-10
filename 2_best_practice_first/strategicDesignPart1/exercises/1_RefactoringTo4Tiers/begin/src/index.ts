@@ -11,6 +11,12 @@ import AssignmentsController from './features/assignments/controller/assignments
 import StudentAssignmentController from './features/student-assignments/controller/student-assignment.controller';
 import StudentAssignmentService from './features/student-assignments/service/student-assignment.service';
 import StudentAssignmentDatabase from './features/student-assignments/persistance/student-assignment.database';
+import ClassesDatabase from './features/classes/persistance/classes.database';
+import ClassesService from './features/classes/service/classes.service';
+import ClassesController from './features/classes/controller/classes.controller';
+import ClassEnrollementsDatabase from './features/class-enrollements/persistance/class-enrollements.database';
+import ClassEnrollementsService from './features/class-enrollements/service/class-enrollements.service';
+import ClassEnrollementsController from './features/class-enrollements/controller/class-enrollements.controller';
 const cors = require('cors');
 const app = express();
 app.use(express.json());
@@ -27,8 +33,6 @@ export const ErrorExceptionType = {
     StudentAlreadyEnrolled: 'StudentAlreadyEnrolled'
 }
 
-// API Endpoints
-
 const studentDatabase = new StudentDatabase(prisma);
 const studentService = new StudentService(studentDatabase);
 const errorExceptionHandler = new ErrorExceptionHandler();
@@ -37,8 +41,8 @@ app.use('/students', studentController.getRouter());
 
 const assignmentsDatabase = new AssignmentsDatabase(prisma);
 const assignmentService = new AssignmentsService(assignmentsDatabase);
-const AssignmentController = new AssignmentsController(assignmentService, errorExceptionHandler);
-app.use('/assignments', AssignmentController.getRouter());
+const assignmentController = new AssignmentsController(assignmentService, errorExceptionHandler);
+app.use('/assignments', assignmentController.getRouter());
 
 const studentAssignmentDatabase = new StudentAssignmentDatabase(prisma);
 const studentAssignmentService = new StudentAssignmentService(studentAssignmentDatabase);
@@ -50,98 +54,19 @@ const studentAssignmentController = new StudentAssignmentController(
 );
 app.use('/student-assignments', studentAssignmentController.getRouter());
 
-app.post('/class-enrollments', async (req: Request, res: Response) => {
-    try {
-        if (isMissingKeys(req.body, ['studentId', 'classId'])) {
-            return res.status(400).json({ error: ErrorExceptionType.ValidationError, data: undefined, success: false });
-        }
-    
-        const { studentId, classId } = req.body;
-    
-        // check if student exists
-        const student = await prisma.student.findUnique({
-            where: {
-                id: studentId
-            }
-        });
-    
-        if (!student) {
-            return res.status(404).json({ error: ErrorExceptionType.StudentNotFound, data: undefined, success: false });
-        }
-    
-        // check if class exists
-        const cls = await prisma.class.findUnique({
-            where: {
-                id: classId
-            }
-        });
+const classesDatabase = new ClassesDatabase(prisma);
+const classesService = new ClassesService(classesDatabase);
+const classesController = new ClassesController(classesService, errorExceptionHandler);
+app.use('/classes', classesController.getRouter());
 
-        // check if student is already enrolled in class
-        const duplicatedClassEnrollment = await prisma.classEnrollment.findFirst({
-            where: {
-                studentId,
-                classId
-            }
-        });
-
-        if (duplicatedClassEnrollment) {
-            return res.status(400).json({ error: ErrorExceptionType.StudentAlreadyEnrolled, data: undefined, success: false });
-        }
-    
-        if (!cls) {
-            return res.status(404).json({ error: ErrorExceptionType.ClassNotFound, data: undefined, success: false });
-        }
-    
-        const classEnrollment = await prisma.classEnrollment.create({
-            data: {
-                studentId,
-                classId
-            }
-        });
-    
-        res.status(201).json({ error: undefined, data: parseForResponse(classEnrollment), success: true });
-    } catch (error) {
-        res.status(500).json({ error: ErrorExceptionType.ServerError, data: undefined, success: false });
-    }
- 
-});
-
-
-// GET all assignments for class
-app.get('/classes/:id/assignments', async (req: Request, res: Response) => {
-    try {
-        const { id } = req.params;
-        if(!isUUID(id)) {
-            return res.status(400).json({ error: ErrorExceptionType.ValidationError, data: undefined, success: false });
-        }
-
-        // check if class exists
-        const cls = await prisma.class.findUnique({
-            where: {
-                id
-            }
-        });
-
-        if (!cls) {
-            return res.status(404).json({ error: ErrorExceptionType.ClassNotFound, data: undefined, success: false });
-        }
-
-        const assignments = await prisma.assignment.findMany({
-            where: {
-                classId: id
-            },
-            include: {
-                class: true,
-                studentTasks: true
-            }
-        });
-    
-        res.status(200).json({ error: undefined, data: parseForResponse(assignments), success: true });
-    } catch (error) {
-        res.status(500).json({ error: ErrorExceptionType.ServerError, data: undefined, success: false });
-    }
-});
-
+const classEnrollementsDatabase = new ClassEnrollementsDatabase(prisma);
+const classEnrollementsService = new ClassEnrollementsService(classEnrollementsDatabase);
+const classEnrollementsController = new ClassEnrollementsController(
+    classesService,
+    studentService,
+    classEnrollementsService,
+    errorExceptionHandler);
+app.use('/class-enrollements', classEnrollementsController.getRouter());
 
 
 

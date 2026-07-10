@@ -1,5 +1,4 @@
 import AssignmentsDatabase from '../persistance/assignments.database';
-import Database from '../persistance/assignments.database';
 import AssignmentIdDto from '../view/assignment-id.dto';
 import CreateAssignmentDto from '../view/create-assignment.dto';
 
@@ -13,8 +12,6 @@ class AssignmentsService {
     async getAssignment(assignmentIdDto: AssignmentIdDto){
         return await this.db.assignment.getAssignment(assignmentIdDto.assignmentID);
     }
-
-    
 }
 
 export default AssignmentsService;
