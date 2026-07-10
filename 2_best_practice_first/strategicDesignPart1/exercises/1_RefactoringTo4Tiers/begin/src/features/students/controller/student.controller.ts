@@ -74,9 +74,7 @@ class StudentController {
             if (!student) {
                 throw new StudentNotFoundException;
             }
-    
             const studentAssignments = await this.studentService.getStudentAssignment(dto);
-        
             res.status(200).json({ error: undefined, data: parseForResponse(studentAssignments), success: true });
         } catch (error) {
             next(error);

@@ -73,7 +73,7 @@ class StudentRepository implements StudentPersistence {
     }
 }
 
-class Database {
+class StudentDatabase {
     public readonly students: StudentPersistence;
 
     constructor(private readonly db: PrismaClient) {
@@ -81,4 +81,4 @@ class Database {
     }
 }
 
-export default Database;
+export default StudentDatabase;

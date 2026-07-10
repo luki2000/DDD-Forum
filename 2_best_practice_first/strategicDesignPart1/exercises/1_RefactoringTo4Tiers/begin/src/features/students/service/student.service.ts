@@ -1,9 +1,9 @@
-import Database from '../persistance/student.database';
+import StudentDatabase from '../persistance/student.database';
 import CreateStudentDto from '../view/create-student.dto';
 import StudentIdDto from '../view/student-id.dto';
 
 class StudentService {
-    constructor(private db: Database) {}
+    constructor(private db: StudentDatabase) {}
 
     async createStudent(student: CreateStudentDto) {
         return await this.db.students.save(student.name);
@@ -14,15 +14,15 @@ class StudentService {
     }
 
     async getStudent(student: StudentIdDto){
-        return await this.db.students.getById(student.id);
+        return await this.db.students.getById(student.studentId);
     }
 
     async getStudentAssignment(student: StudentIdDto){
-        return await this.db.students.getAssignments(student.id);
+        return await this.db.students.getAssignments(student.studentId);
     }
 
     async getStudentGrades(student: StudentIdDto){
-        return await this.db.students.getGrades(student.id);
+        return await this.db.students.getGrades(student.studentId);
     }
 }
 

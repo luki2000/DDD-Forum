@@ -1,8 +1,8 @@
 import { InvalidRequestBodyException } from "../../../shared/errors-and-exceptions/exceptions";
 import { isMissingKeys, isUUID } from "../../../shared/utilities/helpers";
 
-class StudentIdDto {
-    constructor(public studentId: string) {}
+class AssignmentIdDto {
+    constructor(public assignmentID: string) {}
 
     static fromRequest(params: unknown) {
        const requiredKeys = ['id'];
@@ -15,8 +15,8 @@ class StudentIdDto {
             throw new InvalidRequestBodyException(requiredKeys);
        }
        const {id} = params as { id: string };
-       return new StudentIdDto(id);
+       return new AssignmentIdDto(id);
     }
 }
 
-export default StudentIdDto;
+export default AssignmentIdDto;

@@ -3,6 +3,7 @@ import { ErrorExceptionType } from "../..";
 import { 
     ClassNotFoundException,
     InvalidRequestBodyException,
+    InvalidGradeException,
     StudentNotFoundException,
     StudentAlreadyEnrolledException,
     AssignmentNotFoundException,
@@ -12,6 +13,15 @@ import {
 export class ErrorExceptionHandler {
     public handle(error: Error, req: Request, res: Response, next: NextFunction): Response | undefined {
         if(error instanceof InvalidRequestBodyException) {
+            return res.status(400).json({
+                error: ErrorExceptionType.ValidationError,
+                data: undefined,
+                success: false,
+                message: error.message,
+            });
+        }
+
+        if(error instanceof InvalidGradeException) {
             return res.status(400).json({
                 error: ErrorExceptionType.ValidationError,
                 data: undefined,

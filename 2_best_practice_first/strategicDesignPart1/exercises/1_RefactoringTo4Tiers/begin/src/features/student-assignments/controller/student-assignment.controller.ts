@@ -1,8 +1,10 @@
 import { Router, NextFunction, Request, Response } from 'express';
 import { parseForResponse } from '../../../shared/utilities/helpers';
 import { ErrorExceptionHandler } from '../../../shared/errors-and-exceptions/error-exception-handler';
-import { AssignmentNotFoundException, StudentNotFoundException } from '../../../shared/errors-and-exceptions/exceptions';
+import { AssignmentNotFoundException, StudentAssignmentNotFoundException, StudentNotFoundException } from '../../../shared/errors-and-exceptions/exceptions';
 import StudentAssignmentIdDto from '../view/student-assignment-id.dto';
+import SubmitStudentAssignmentDto from '../view/submit-student-assignment.dto';
+import AssignmentGradeIdDto from '../view/grade-assignment.dto';
 import AssignmentsService from '../../assignments/service/assignments.service';
 import AssignmentIdDto from '../../assignments/view/assignment-id.dto';
 import StudentService from '../../students/service/student.service';
@@ -32,8 +34,8 @@ class StudentAssignmentController {
     // baseUrl will be /student-assignement
     private routes() {
         this.router.post("/", (req, res, next) => this.addAssignmentToStudent(req, res, next));
-        // this.router.post("/submit", (req, res, next) => this.submitAssignment(req, res, next));
-        // this.router.post('/grade', (req, res, next) => this.gradeAssignment(req, res, next));
+        this.router.post("/submit", (req, res, next) => this.submitAssignment(req, res, next));
+        this.router.post('/grade', (req, res, next) => this.gradeAssignment(req, res, next));
     }
     
     private async addAssignmentToStudent(req: Request, res: Response, next: NextFunction) {
@@ -65,63 +67,43 @@ class StudentAssignmentController {
         }
     
     }
-    /*
-    private async getAllStudents(req: Request, res: Response, next: NextFunction) {
+    
+    private async submitAssignment(req: Request, res: Response, next: NextFunction) {
         try {
-            const students = await this.studentService.getAllStudents();
-            res.status(200).json({ error: undefined, data: parseForResponse(students), success: true });
+            const dto = SubmitStudentAssignmentDto.fromRequest(req.body);
+
+            const studentAssignment = await this.studentAssignmentService.getStudentAssignmentById(dto.id);
+    
+            if (!studentAssignment) {
+                throw new StudentAssignmentNotFoundException;
+            }
+    
+            const studentAssignmentUpdated = await this.studentAssignmentService.submitAssignment(dto.id);
+    
+            res.status(200).json({ error: undefined, data: parseForResponse(studentAssignmentUpdated), success: true });
         } catch (error) {
             next(error);
         }
     }
 
-    private async getStudentById(req: Request, res: Response, next: NextFunction) {
+
+    private async gradeAssignment(req: Request, res: Response, next: NextFunction) {
         try {
-            const dto = StudentIdDto.fromRequest(req.params);
-            const student = await this.studentService.getStudent(dto);
-        
-            if (!student) {
-                throw new StudentNotFoundException;
+            const dto = AssignmentGradeIdDto.fromRequest(req.body);
+
+            const studentAssignment = await this.studentAssignmentService.getStudentAssignmentById(dto.assignmentId);
+
+            if (!studentAssignment) {
+                throw new StudentAssignmentNotFoundException;
             }
-            res.status(200).json({ error: undefined, data: parseForResponse(student), success: true });
+
+            const studentAssignmentUpdated = await this.studentAssignmentService.getStudentGrades(dto.assignmentId, dto.grade);
+
+            res.status(200).json({ error: undefined, data: parseForResponse(studentAssignmentUpdated), success: true });
         } catch (error) {
             next(error);
         }
     }
-
-    private async getAllStudentSubmittedAssignments(req: Request, res: Response, next: NextFunction) {
-        try {
-            const dto = StudentIdDto.fromRequest(req.params);
-            const student = await this.studentService.getStudent(dto);
-    
-            if (!student) {
-                throw new StudentNotFoundException;
-            }
-    
-            const studentAssignments = await this.studentService.getStudentAssignment(dto);
-        
-            res.status(200).json({ error: undefined, data: parseForResponse(studentAssignments), success: true });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    private async getAllStudentGrades(req: Request, res: Response, next: NextFunction) {
-        try {
-            const dto = StudentIdDto.fromRequest(req.params);
-            const student = await this.studentService.getStudent(dto);
-    
-            if (!student) {
-                throw new StudentNotFoundException;
-            }
-    
-            const studentAssignments = await this.studentService.getStudentGrades(dto);
-        
-            res.status(200).json({ error: undefined, data: parseForResponse(studentAssignments), success: true });
-        } catch (error) {
-            next(error);
-        }
-    }*/
 }
 
 export default StudentAssignmentController;

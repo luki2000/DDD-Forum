@@ -4,6 +4,12 @@ class InvalidRequestBodyException extends Error {
     }
 }
 
+class InvalidGradeException extends Error {
+    constructor() {
+        super("Grade must be one of: A, B, C, D");
+    }
+}
+
 class StudentNotFoundException extends Error {
     constructor() {
         super("Student not found");
@@ -36,6 +42,7 @@ class StudentAssignmentNotFoundException extends Error {
 
 export {
     InvalidRequestBodyException,
+    InvalidGradeException,
     StudentNotFoundException,
     ClassNotFoundException,
     StudentAlreadyEnrolledException,
