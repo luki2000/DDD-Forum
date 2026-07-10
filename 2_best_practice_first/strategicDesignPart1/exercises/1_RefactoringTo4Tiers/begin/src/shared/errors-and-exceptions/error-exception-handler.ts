@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ErrorExceptionType } from "../..";
+import { ErrorExceptionType } from "./error-exception-type";
 import { 
     ClassNotFoundException,
     InvalidRequestBodyException,
